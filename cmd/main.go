@@ -55,22 +55,24 @@ func main() {
 	}()
 
 	http.HandleFunc("/count", showClientMap)
+	http.Handle("/", http.FileServer(http.Dir("./")))
+
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatalln(err)
 	}
 }
 
 func showClientMap(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, `{"outgoing":{`)
+	fmt.Fprint(w, `{"hosts": [`)
 	cnt := len(outgoingBytes)
 	for k, v := range outgoingBytes {
-		fmt.Fprintf(w, "\n%q: %v", k, v)
+		fmt.Fprintf(w, "\n { \"ip_address\": %q, \"outgoing\": %v }", k, v)
 		if cnt > 1 {
 			fmt.Fprint(w, ",")
 		}
 		cnt--
 	}
-	fmt.Fprint(w, `} }`)
+	fmt.Fprint(w, `] }`)
 }
 
 func handlePacket(packet gopacket.Packet, counter chan *PacketCount) {
