@@ -24,7 +24,9 @@ main =
 -- MODEL
 
 type alias Model =
-    { hosts : List ( IP, Host ) }
+    { hosts : Hosts }
+
+type alias Hosts = List ( Host )
 
 type alias Host =
     { outbound : Int
@@ -68,32 +70,26 @@ port sender =
   in
       Signal.map send (Signal.constant "61801")
 
-hosts : Json.Decoder (List String)
-hosts =
-  let
-      host = Json.object2 (\ip rate -> ip ++ ", " ++ rate)
-          ("ip_address" := Json.string)
-          ("outgoing" := Json.string)
-  in
-      Json.object1 Model (Json.list host)
+hostDecoder : Json.Decoder Host
+hostDecoder = Json.object2 Host
+          ("outbound" := Json.int)
+          ("inbound" := Json.int)
+
+hostsDecoder : Json.Decoder (List Host)
+hostsDecoder = Json.list hostDecoder
 
  -- VIEW
+
+stringifyHost : Host -> String
+stringifyHost host = (toString host.inbound) ++ " " ++ (toString host.outbound)
+
+stringifyHosts : List Host -> String
+stringifyHosts hosts = List.foldr (++) "" (List.map stringifyHost hosts)
 
 view : Signal.Address Action -> Model -> Html
 view host model =
   div []
-    [ text "-"
-    , div [ countStyle ] [ text (toString model) ]
-    , text "+"
-    ]
-
-countStyle : Attribute
-countStyle =
-  style
-    [ ("font-size", "20px")
-    , ("font-family", "monospace")
-    , ("display", "inline-block")
-    , ("width", "50px")
-    , ("text-align", "center")
+    [ text ("Found hosts " ++ (toString (List.length model.hosts)))
+    , div [ ] [ text (stringifyHosts model.hosts) ]
     ]
 
