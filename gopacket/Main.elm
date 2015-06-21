@@ -13,6 +13,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import StartApp
+import Time
 
 main =
   StartApp.start
@@ -68,7 +69,7 @@ port sender =
         Task.toResult (lookupHosts)
           `andThen` Signal.send cityMailbox.address
   in
-      Signal.map send (Signal.constant "61801")
+      Signal.map send (Signal.map (\s -> "61801") (Time.every 2500))
 
 hostDecoder : Json.Decoder Host
 hostDecoder = Json.object2 Host
