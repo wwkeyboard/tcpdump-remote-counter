@@ -25,13 +25,13 @@ main =
 -- MODEL
 
 type alias Model =
-    { hosts : Hosts }
+    { hosts : HostList }
 
-type alias Hosts = List ( Host )
+type alias HostList = List ( Host )
 
 type alias Host =
-    { outbound : Int
-    , inbound : Int
+    { ip_address : String
+    , outgoing : Int
     }
 
 type alias IP = String
@@ -69,16 +69,16 @@ port sender =
 
 hostDecoder : Json.Decoder Host
 hostDecoder = Json.object2 Host
-          ("outbound" := Json.int)
-          ("inbound" := Json.int)
+          ("ip_address" := Json.string)
+          ("outgoing" := Json.int)
 
 hostsDecoder : Json.Decoder (List Host)
-hostsDecoder = Json.list hostDecoder
+hostsDecoder = Json.at ["hosts"] (Json.list hostDecoder)
 
  -- VIEW
 
 stringifyHost : Host -> String
-stringifyHost host = (toString host.inbound) ++ " " ++ (toString host.outbound)
+stringifyHost host = (toString host.ip_address) ++ " -> " ++ (toString host.outgoing)
 
 stringifyHosts : List Host -> String
 stringifyHosts hosts = List.foldr (++) "" (List.map stringifyHost hosts)
