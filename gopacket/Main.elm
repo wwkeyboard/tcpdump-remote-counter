@@ -48,13 +48,9 @@ update action model =
   case action of
     NewData -> model
 
-cityMailbox : Signal.Mailbox (Result String (String))
-cityMailbox =
-    Signal.mailbox (Err "Lets Find a City!")
-
-report : String -> Task x ()
-report cityName =
-    Signal.send cityMailbox.address (Ok cityName)
+hostMailbox : Signal.Mailbox (Result String (String))
+hostMailbox =
+    Signal.mailbox (Err "can't find hosts from the packet provider")
 
 lookupHosts : Task String String
 lookupHosts =
@@ -67,7 +63,7 @@ port sender : Signal (Task x ())
 port sender =
   let send rawZip =
         Task.toResult (lookupHosts)
-          `andThen` Signal.send cityMailbox.address
+          `andThen` Signal.send hostMailbox.address
   in
       Signal.map send (Signal.map (\s -> "61801") (Time.every 2500))
 
