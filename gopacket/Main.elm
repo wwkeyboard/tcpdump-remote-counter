@@ -27,14 +27,16 @@ main =
       Signal.foldp
         (\(Just action) model -> update action model)
         init
-        actions.signal
+        hostMailbox.signal
   in
     Signal.map (view address) model
 
 -- MODEL
 
 type alias Model =
-    { hosts : HostList }
+    { hosts : HostList
+    , errors : List String
+    }
 
 type alias HostList = List ( Host )
 
@@ -46,36 +48,43 @@ type alias Host =
 type alias IP = String
 
 init : Model
-init = { hosts = [] }
+init = { hosts = [], errors = ["blar"] }
 
 -- UPDATE
 
-type Action = NewData HostList
+type Action
+  = NewData HostList
+  | QueryError (List String)
+  | NoOp
 
 update : Action -> Model -> Model
 update action model =
   case action of
     NewData hs ->
-    { model | hosts <- [] }
+      { model | hosts <- hs, errors <- ["new data"] }
+    QueryError err ->
+      { model | errors <- ["querry error"]}
 
-hostMailbox : Signal.Mailbox (Result String (HostList))
+hostMailbox : Signal.Mailbox (Maybe Action)
 hostMailbox =
-    Signal.mailbox (Err "can't find hosts from the packet provider")
+    Signal.mailbox (Just NoOp)
 
 lookupHosts : Task String HostList
 lookupHosts =
     (Task.mapError (always "couldn't parse host list") (Http.get hostsDecoder packetUrl))
-
-toModel : HostList -> Model
-toModel inHosts = { hosts = inHosts }
 
 packetUrl : String
 packetUrl = "http://localhost:8080/count"
 
 port sender : Signal (Task x ())
 port sender =
-  let getHosts discard =
-        Task.toResult lookupHosts `andThen` Signal.send hostMailbox.address
+  let
+    getHosts discard =
+      (Task.toResult lookupHosts) `andThen` maybeSend
+    maybeSend val =
+      case val of
+        Ok v -> Signal.send hostMailbox.address (Just (NewData v))
+        Err err -> Signal.send hostMailbox.address (Just (QueryError ["somethings wrong"]))
   in
       Signal.map getHosts (Time.every 2500)
 
@@ -100,4 +109,5 @@ view host model =
   div []
     [ text ("Found hosts " ++ (toString (List.length model.hosts)))
     , div [ ] [ text (stringifyHosts model.hosts) ]
+    , div [ ] [ text (toString model.errors) ]
     ]
