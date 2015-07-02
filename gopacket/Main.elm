@@ -16,11 +16,20 @@ import StartApp
 import Time
 
 main =
-  StartApp.start
-    { model = init
-    , update = update
-    , view = view
-    }
+  let
+    actions =
+      Signal.mailbox Nothing
+
+    address =
+      Signal.forwardTo actions.address Just
+
+    model =
+      Signal.foldp
+        (\(Just action) model -> update action model)
+        init
+        actions.signal
+  in
+    Signal.map (view address) model
 
 -- MODEL
 
@@ -41,38 +50,41 @@ init = { hosts = [] }
 
 -- UPDATE
 
-type Action = NewData
+type Action = NewData HostList
 
 update : Action -> Model -> Model
 update action model =
   case action of
-    NewData -> model
+    NewData hs ->
+    { model | hosts <- [] }
 
-hostMailbox : Signal.Mailbox (Result String (String))
+hostMailbox : Signal.Mailbox (Result String (HostList))
 hostMailbox =
     Signal.mailbox (Err "can't find hosts from the packet provider")
 
-lookupHosts : Task String String
+lookupHosts : Task String HostList
 lookupHosts =
-    (Task.mapError (always "Not found!") (Http.getString packetUrl))
+    (Task.mapError (always "couldn't parse host list") (Http.get hostsDecoder packetUrl))
+
+toModel : HostList -> Model
+toModel inHosts = { hosts = inHosts }
 
 packetUrl : String
-packetUrl = "http://localhost:8080/count" 
+packetUrl = "http://localhost:8080/count"
 
 port sender : Signal (Task x ())
 port sender =
-  let send rawZip =
-        Task.toResult (lookupHosts)
-          `andThen` Signal.send hostMailbox.address
+  let getHosts discard =
+        Task.toResult lookupHosts `andThen` Signal.send hostMailbox.address
   in
-      Signal.map send (Signal.map (\s -> "61801") (Time.every 2500))
+      Signal.map getHosts (Time.every 2500)
 
 hostDecoder : Json.Decoder Host
 hostDecoder = Json.object2 Host
           ("ip_address" := Json.string)
           ("outgoing" := Json.int)
 
-hostsDecoder : Json.Decoder (List Host)
+hostsDecoder : Json.Decoder HostList
 hostsDecoder = Json.at ["hosts"] (Json.list hostDecoder)
 
  -- VIEW
@@ -89,4 +101,3 @@ view host model =
     [ text ("Found hosts " ++ (toString (List.length model.hosts)))
     , div [ ] [ text (stringifyHosts model.hosts) ]
     ]
-
