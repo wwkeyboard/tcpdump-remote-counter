@@ -1,8 +1,5 @@
-{- Welcome to your first Elm program
-Read up on syntax:
-  http://elm-lang.org/learn/Syntax.elm
-Learn about the Elm's core libraries:
-  http://package.elm-lang.org/packages/elm-lang/core/latest/
+{-
+  Reads from a server that's parsing PCAP, and display the bandwidth usages.
 -}
 
 import Graphics.Element exposing (..)
@@ -15,6 +12,9 @@ import Html.Events exposing (..)
 import StartApp
 import Time
 
+
+-- main is borrowed from StartApp, but by default StartApp doesn't give access
+-- to the list of incoming mailboxes
 main =
   let
     actions =
@@ -32,7 +32,6 @@ main =
     Signal.map (view address) model
 
 -- MODEL
-
 type alias Model =
     { hosts : HostList
     , errors : List String
@@ -41,17 +40,27 @@ type alias Model =
 type alias HostList = List ( Host )
 
 type alias Host =
-    { ip_address : String
-    , outgoing : Int
+    { ip_address : IP
+    , outgoing : Bandwidth
     }
 
+-- IP address, either v4 or v6
 type alias IP = String
 
+-- Bandwidth in kbps
+type alias Bandwidth = Int
+
 init : Model
-init = { hosts = [], errors = ["blar"] }
+init = { hosts = []
+       , errors = []
+       }
+
+-- Holds the list of parsed incoming hosts
+hostMailbox : Signal.Mailbox (Maybe Action)
+hostMailbox =
+    Signal.mailbox (Just NoOp)
 
 -- UPDATE
-
 type Action
   = NewData HostList
   | QueryError (List String)
@@ -64,10 +73,6 @@ update action model =
       { model | hosts <- hs, errors <- ["new data"] }
     QueryError err ->
       { model | errors <- ["querry error"]}
-
-hostMailbox : Signal.Mailbox (Maybe Action)
-hostMailbox =
-    Signal.mailbox (Just NoOp)
 
 lookupHosts : Task String HostList
 lookupHosts =
@@ -88,26 +93,37 @@ port sender =
   in
       Signal.map getHosts (Time.every 2500)
 
+hostsDecoder : Json.Decoder HostList
+hostsDecoder = Json.at ["hosts"] (Json.list hostDecoder)
+
 hostDecoder : Json.Decoder Host
 hostDecoder = Json.object2 Host
           ("ip_address" := Json.string)
           ("outgoing" := Json.int)
 
-hostsDecoder : Json.Decoder HostList
-hostsDecoder = Json.at ["hosts"] (Json.list hostDecoder)
-
  -- VIEW
-
-stringifyHost : Host -> String
-stringifyHost host = (toString host.ip_address) ++ " -> " ++ (toString host.outgoing)
-
-stringifyHosts : List Host -> String
-stringifyHosts hosts = List.foldr (++) "" (List.map stringifyHost hosts)
-
 view : Signal.Address Action -> Model -> Html
 view host model =
-  div []
-    [ text ("Found hosts " ++ (toString (List.length model.hosts)))
-    , div [ ] [ text (stringifyHosts model.hosts) ]
+  div [class "content"]
+    [ div [ ] [ hostsView model.hosts ]
     , div [ ] [ text (toString model.errors) ]
+    ]
+
+hostsView : List Host -> Html
+hostsView hosts =
+  let
+    sortedHosts = List.sortBy .ip_address hosts
+    viewedHosts = List.map hostView sortedHosts
+  in
+    div []
+    [ h1 [] [text "Hosts"]
+    , div [] viewedHosts
+    ]
+
+hostView : Host -> Html
+hostView host =
+  div
+    [ class "host" ]
+    [ span [class "ipAddress"] [text host.ip_address]
+    , span [class "bandwidth"] [text (toString host.outgoing)]
     ]
