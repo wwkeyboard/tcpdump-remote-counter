@@ -1,3 +1,4 @@
+module Main where
 {-
   Reads from a server that's parsing PCAP, and display the bandwidth usages.
 -}
@@ -115,10 +116,7 @@ hostsView hosts =
     sortedHosts = List.sortBy .ip_address hosts
     viewedHosts = List.map hostView sortedHosts
   in
-    div []
-    [ h1 [] [text "Hosts"]
-    , div [] viewedHosts
-    ]
+    div [] viewedHosts
 
 hostView : Host -> Html
 hostView host =

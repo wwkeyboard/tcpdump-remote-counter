@@ -4455,12 +4455,7 @@ Elm.Main.make = function (_elm) {
          sortedHosts);
          return A2($Html.div,
          _L.fromArray([]),
-         _L.fromArray([A2($Html.h1,
-                      _L.fromArray([]),
-                      _L.fromArray([$Html.text("Hosts")]))
-                      ,A2($Html.div,
-                      _L.fromArray([]),
-                      viewedHosts)]));
+         viewedHosts);
       }();
    };
    var view = F2(function (host,
@@ -4490,7 +4485,7 @@ Elm.Main.make = function (_elm) {
                                ,_L.fromArray(["querry error"])]],
               model);}
          _U.badCase($moduleName,
-         "between lines 71 and 75");
+         "between lines 72 and 76");
       }();
    });
    var NoOp = {ctor: "NoOp"};
@@ -4541,7 +4536,7 @@ Elm.Main.make = function (_elm) {
                  hostMailbox.address,
                  $Maybe.Just(NewData(val._0)));}
             _U.badCase($moduleName,
-            "between lines 90 and 93");
+            "between lines 91 and 94");
          }();
       };
       var getHosts = function (discard) {
@@ -4567,7 +4562,7 @@ Elm.Main.make = function (_elm) {
                  _v6._0,
                  model);}
             _U.badCase($moduleName,
-            "on line 28, column 34 to 53");
+            "on line 29, column 34 to 53");
          }();
       }),
       init,
