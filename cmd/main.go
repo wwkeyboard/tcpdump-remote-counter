@@ -28,10 +28,10 @@ var (
 )
 
 func main() {
-	var (
-		device  = flag.String("device", "en0", "device to listen to")
-		timeout = flag.Duration("timeout", pcap.BlockForever, "time intervals to parse captured packets")
-	)
+	// var (
+	// 	device  = flag.String("device", "en0", "device to listen to")
+	// 	timeout = flag.Duration("timeout", pcap.BlockForever, "time intervals to parse captured packets")
+	// )
 	flag.Parse()
 
 	const (
@@ -39,8 +39,8 @@ func main() {
 		promiscuousMode = true
 	)
 
-	handle, err := pcap.OpenLive(*device, MTULen, promiscuousMode, *timeout)
-	// handle, err := pcap.OpenOffline("./dump_one.pcap")
+	//	handle, err := pcap.OpenLive(*device, MTULen, promiscuousMode, *timeout)
+	handle, err := pcap.OpenOffline("./dump_one.pcap")
 	if err != nil {
 		log.Fatalln(err)
 	}
