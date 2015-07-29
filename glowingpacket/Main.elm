@@ -106,22 +106,22 @@ hostDecoder = Json.object2 Host
 view : Signal.Address Action -> Model -> Html
 view host model =
   div [class "content"]
-    [ div [ ] [ hostsView model.hosts ]
-    , div [ ] [ text (toString model.errors) ]
+    [ div [ class "errors" ] [ text (toString model.errors) ]
+    , div [ class "hosts" ] (hostsView model.hosts)
     ]
 
-hostsView : List Host -> Html
+hostsView : List Host -> List Html
 hostsView hosts =
   let
     sortedHosts = List.sortBy .ip_address hosts
     viewedHosts = List.map hostView sortedHosts
   in
-    div [] viewedHosts
+    viewedHosts
 
 hostView : Host -> Html
 hostView host =
   div
     [ class "host" ]
-    [ span [class "ipAddress"] [text host.ip_address]
-    , span [class "bandwidth"] [text (toString host.outgoing)]
+    [ div [class "ipAddress"] [text host.ip_address]
+    , div [class "bandwidth"] [text (toString host.outgoing)]
     ]

@@ -4436,10 +4436,10 @@ Elm.Main.make = function (_elm) {
    var hostView = function (host) {
       return A2($Html.div,
       _L.fromArray([$Html$Attributes.$class("host")]),
-      _L.fromArray([A2($Html.span,
+      _L.fromArray([A2($Html.div,
                    _L.fromArray([$Html$Attributes.$class("ipAddress")]),
                    _L.fromArray([$Html.text(host.ip_address)]))
-                   ,A2($Html.span,
+                   ,A2($Html.div,
                    _L.fromArray([$Html$Attributes.$class("bandwidth")]),
                    _L.fromArray([$Html.text($Basics.toString(host.outgoing))]))]));
    };
@@ -4453,9 +4453,7 @@ Elm.Main.make = function (_elm) {
          var viewedHosts = A2($List.map,
          hostView,
          sortedHosts);
-         return A2($Html.div,
-         _L.fromArray([]),
-         viewedHosts);
+         return viewedHosts;
       }();
    };
    var view = F2(function (host,
@@ -4463,11 +4461,11 @@ Elm.Main.make = function (_elm) {
       return A2($Html.div,
       _L.fromArray([$Html$Attributes.$class("content")]),
       _L.fromArray([A2($Html.div,
-                   _L.fromArray([]),
-                   _L.fromArray([hostsView(model.hosts)]))
+                   _L.fromArray([$Html$Attributes.$class("errors")]),
+                   _L.fromArray([$Html.text($Basics.toString(model.errors))]))
                    ,A2($Html.div,
-                   _L.fromArray([]),
-                   _L.fromArray([$Html.text($Basics.toString(model.errors))]))]));
+                   _L.fromArray([$Html$Attributes.$class("hosts")]),
+                   hostsView(model.hosts))]));
    });
    var packetUrl = "http://localhost:8080/count";
    var update = F2(function (action,

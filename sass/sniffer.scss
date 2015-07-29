@@ -1,0 +1,19 @@
+@import "grid";
+
+.hosts {
+    @include grid
+}
+
+.host {
+    @include col-2-3;
+    
+    @include grid;
+}
+
+.ipAddress {
+    @include col-2-3;
+}
+
+.bandwidth {
+    @include col-1-3;
+}
