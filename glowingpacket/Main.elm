@@ -92,7 +92,7 @@ port sender =
         Ok v -> Signal.send hostMailbox.address (Just (NewData v))
         Err err -> Signal.send hostMailbox.address (Just (QueryError ["somethings wrong"]))
   in
-      Signal.map getHosts (Time.every 2500)
+      Signal.map getHosts (Time.every 500)
 
 hostsDecoder : Json.Decoder HostList
 hostsDecoder = Json.at ["hosts"] (Json.list hostDecoder)
@@ -113,7 +113,7 @@ view host model =
 hostsView : List Host -> List Html
 hostsView hosts =
   let
-    sortedHosts = List.sortBy .ip_address hosts
+    sortedHosts = List.reverse (List.sortBy .outgoing hosts)
     viewedHosts = List.map hostView sortedHosts
   in
     viewedHosts
