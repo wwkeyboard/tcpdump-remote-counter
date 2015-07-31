@@ -68,7 +68,7 @@ func showClientMap(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, `{"hosts": [`)
 	cnt := len(outgoingBytes)
 	for k, v := range outgoingBytes {
-		fmt.Fprintf(w, "\n { \"ip_address\": %q, \"outgoing\": %v }", k, v)
+		fmt.Fprintf(w, "\n { \"ip_address\": %q, \"outgoing\": %v, \"incoming\": %v }", k, v, incomingBytes[k])
 		if cnt > 1 {
 			fmt.Fprint(w, ",")
 		}

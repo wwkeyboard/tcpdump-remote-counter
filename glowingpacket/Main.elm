@@ -43,6 +43,7 @@ type alias HostList = List ( Host )
 type alias Host =
     { ip_address : IP
     , outgoing : Bandwidth
+    , incoming : Bandwidth
     }
 
 -- IP address, either v4 or v6
@@ -98,9 +99,10 @@ hostsDecoder : Json.Decoder HostList
 hostsDecoder = Json.at ["hosts"] (Json.list hostDecoder)
 
 hostDecoder : Json.Decoder Host
-hostDecoder = Json.object2 Host
+hostDecoder = Json.object3 Host
           ("ip_address" := Json.string)
           ("outgoing" := Json.int)
+          ("incoming" := Json.int)
 
  -- VIEW
 view : Signal.Address Action -> Model -> Html
@@ -123,5 +125,6 @@ hostView host =
   div
     [ class "host" ]
     [ div [class "ipAddress"] [text host.ip_address]
-    , div [class "bandwidth"] [text (toString host.outgoing)]
+    , div [class "bandwidth outgoing"] [text (toString host.outgoing)]
+    , div [class "bandwidth incoming"] [text (toString host.incoming)]
     ]

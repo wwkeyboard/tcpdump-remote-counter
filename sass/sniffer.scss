@@ -1,4 +1,9 @@
 @import "grid";
+@import url(http://fonts.googleapis.com/css?family=Open+Sans);
+
+body {
+    font-family: 'Open Sans', sans-serif;
+}
 
 .hosts {
     @include grid
@@ -15,5 +20,5 @@
 }
 
 .bandwidth {
-    @include col-1-3;
+    @include col-1-6;
 }
