@@ -109,6 +109,7 @@ view : Signal.Address Action -> Model -> Html
 view host model =
   div [class "content"]
     [ div [ class "errors" ] [ text (toString model.errors) ]
+    , div [ class "hostheaders" ] [ headerView ]
     , div [ class "hosts" ] (hostsView model.hosts)
     ]
 
@@ -127,4 +128,13 @@ hostView host =
     [ div [class "ipAddress"] [text host.ip_address]
     , div [class "bandwidth outgoing"] [text (toString host.outgoing)]
     , div [class "bandwidth incoming"] [text (toString host.incoming)]
+    ]
+
+headerView : Html
+headerView =
+  div
+    [ class "host headers" ]
+    [ div [class "ipAddress" ] [text "IP Address"]
+    , div [class "bandwidth outgoing"] [text "Outgoing Bandwidth"]
+    , div [class "bandwidth incoming"] [text "Incoming Bandwidth"]
     ]

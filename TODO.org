@@ -1,0 +1,3 @@
+* DONE headers for hosts columns
+* TODO sparkline for hosts bandwidth
+* TODO sort-able hosts
