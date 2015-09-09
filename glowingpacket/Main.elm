@@ -91,7 +91,7 @@ port sender =
     maybeSend val =
       case val of
         Ok v -> Signal.send hostMailbox.address (Just (NewData v))
-        Err err -> Signal.send hostMailbox.address (Just (QueryError ["somethings wrong"]))
+        Err err -> Signal.send hostMailbox.address (Just (QueryError [err]))
   in
       Signal.map getHosts (Time.every 500)
 

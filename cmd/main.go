@@ -65,6 +65,7 @@ func main() {
 
 func showClientMap(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Received request")
+	w.Header().Add("Access-Control-Allow-Origin", "*")
 	fmt.Fprint(w, `{"hosts": [`)
 	cnt := len(outgoingBytes)
 	for k, v := range outgoingBytes {
